@@ -228,6 +228,344 @@ Possible enhancements:
 * Add Swagger API documentation
 
 ---
+# System Architecture – Remaining Modules
+
+The backend is designed using a **modular service-based architecture** where AI logic is separated from business logic. This ensures scalability, maintainability, and easier integration with external AI services.
+
+The system consists of the following additional modules:
+
+---
+
+# Module 3: AI Impact Reporting Generator
+
+## Purpose
+
+This module generates **environmental impact reports for each order** using rule-based estimations and AI-generated summaries.
+
+It helps quantify the sustainability benefits of eco-friendly product purchases.
+
+---
+
+## Key Features
+
+### 1. Estimated Plastic Saved
+
+Calculates plastic reduction based on product type and predefined material substitution rules.
+
+Example logic:
+
+* Bamboo toothbrush vs plastic toothbrush
+* Reusable bags vs plastic bags
+
+---
+
+### 2. Carbon Emissions Avoided
+
+Uses logic-based estimation based on:
+
+* product material
+* manufacturing footprint
+* shipping distance
+
+Example calculation:
+
+```
+carbon_avoided = baseline_carbon - eco_product_carbon
+```
+
+---
+
+### 3. Local Sourcing Impact
+
+Determines whether the product was sourced locally.
+
+Factors:
+
+* supplier location
+* warehouse distance
+* shipping method
+
+Example summary:
+
+```
+"This product was sourced within 200km reducing transportation emissions."
+```
+
+---
+
+### 4. Human-Readable Impact Statement
+
+AI generates a **customer-friendly sustainability summary** stored with the order.
+
+Example:
+
+```
+"By purchasing this bamboo toothbrush, you helped reduce plastic waste and avoided approximately 0.2 kg of carbon emissions."
+```
+
+---
+
+## Architecture Flow
+
+```
+Order Created
+      ↓
+Impact Calculation Service
+      ↓
+AI Summary Generator
+      ↓
+Impact Report Stored in Database
+      ↓
+Displayed to User in Order History
+```
+
+---
+
+## Module Structure
+
+```
+server
+│
+├── controllers
+│      impactController.js
+│
+├── services
+│      impactService.js
+│      aiImpactSummaryService.js
+│
+├── models
+│      impactReportModel.js
+│
+└── routes
+       impactRoutes.js
+```
+
+---
+
+# Module 4: AI WhatsApp Support Bot
+
+## Purpose
+
+Provide automated customer support through WhatsApp using AI combined with real order data.
+
+The bot answers common queries and escalates complex issues to human support agents.
+
+---
+
+## Key Features
+
+### 1. Order Status Queries
+
+The bot retrieves order information directly from the database.
+
+Example interaction:
+
+User:
+
+```
+Where is my order?
+```
+
+Bot:
+
+```
+Your order #3245 has been shipped and will arrive tomorrow.
+```
+
+---
+
+### 2. Return Policy Questions
+
+The bot uses a **knowledge base prompt** to answer policy questions.
+
+Example:
+
+User:
+
+```
+Can I return an item after 7 days?
+```
+
+Bot:
+
+```
+Yes, returns are accepted within 14 days of delivery.
+```
+
+---
+
+### 3. Escalation Handling
+
+The bot identifies high-priority issues such as:
+
+* refund requests
+* payment disputes
+* damaged products
+
+These are escalated to human agents.
+
+Example logic:
+
+```
+if message contains:
+    "refund"
+    "chargeback"
+    "complaint"
+→ escalate to support team
+```
+
+---
+
+### 4. AI Conversation Logging
+
+All bot interactions are logged for:
+
+* quality monitoring
+* training improvements
+* customer support tracking
+
+---
+
+## Architecture Flow
+
+```
+User WhatsApp Message
+        ↓
+Webhook Receiver
+        ↓
+Message Processing Service
+        ↓
+Intent Detection
+        ↓
+AI Response Generation
+        ↓
+Database Logging
+        ↓
+Response Sent to User
+```
+
+---
+
+## Module Structure
+
+```
+server
+│
+├── controllers
+│      whatsappController.js
+│
+├── services
+│      whatsappBotService.js
+│      aiChatService.js
+│
+├── models
+│      conversationModel.js
+│
+└── routes
+       whatsappRoutes.js
+```
+
+---
+
+# Technical Design Principles
+
+## 1. Structured JSON Outputs
+
+All AI responses follow structured JSON formats for easy integration.
+
+Example:
+
+```json
+{
+  "intent": "order_status",
+  "response": "Your order has been shipped",
+  "confidence": 0.92
+}
+```
+
+---
+
+## 2. Prompt + Response Logging
+
+All AI interactions are stored for monitoring and debugging.
+
+Logged data:
+
+* prompt
+* AI response
+* timestamp
+* user query
+* module source
+
+---
+
+## 3. Environment-Based API Key Management
+
+Sensitive credentials are stored in environment variables.
+
+Example:
+
+```
+OPENAI_API_KEY
+MONGO_URI
+WHATSAPP_API_KEY
+```
+
+These are loaded using `.env` configuration.
+
+---
+
+## 4. Separation of AI and Business Logic
+
+AI calls are isolated in the **service layer** to avoid mixing with controllers.
+
+Benefits:
+
+* easier testing
+* easier AI provider replacement
+* cleaner architecture
+
+---
+
+## 5. Error Handling and Validation
+
+All APIs include:
+
+* request validation
+* try/catch error handling
+* standardized error responses
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid product description"
+}
+```
+
+---
+
+# Scalability Considerations
+
+The architecture supports future extensions such as:
+
+* multi-language AI support
+* analytics dashboards
+* recommendation systems
+* AI-driven sustainability scoring
+
+---
+
+# Conclusion
+
+This architecture demonstrates a **scalable AI-enabled backend system** that integrates:
+
+* product categorization
+* sustainability impact reporting
+* AI customer support automation
+
+while maintaining clean separation between business logic and AI services.
 
 # Author
 
